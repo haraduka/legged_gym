@@ -88,6 +88,9 @@ class BaseTask():
         self.enable_viewer_sync = True
         self.viewer = None
 
+        self.camera_track_robot = False
+        self.camera_i = 0
+
         # if running with a viewer, set up keyboard shortcuts and camera
         if self.headless == False:
             # subscribe to keyboard shortcuts
@@ -96,7 +99,15 @@ class BaseTask():
             self.gym.subscribe_viewer_keyboard_event(
                 self.viewer, gymapi.KEY_ESCAPE, "QUIT")
             self.gym.subscribe_viewer_keyboard_event(
+                self.viewer, gymapi.KEY_SPACE, "RESET")
+            self.gym.subscribe_viewer_keyboard_event(
                 self.viewer, gymapi.KEY_V, "toggle_viewer_sync")
+            self.gym.subscribe_viewer_keyboard_event(
+                self.viewer, gymapi.KEY_N, "Camera Increment")
+            self.gym.subscribe_viewer_keyboard_event(
+                self.viewer, gymapi.KEY_B, "Camera Decrement")
+            self.gym.subscribe_viewer_keyboard_event(
+                self.viewer, gymapi.KEY_C, "Toggle Camera")
 
     def get_observations(self):
         return self.obs_buf
@@ -127,8 +138,18 @@ class BaseTask():
             for evt in self.gym.query_viewer_action_events(self.viewer):
                 if evt.action == "QUIT" and evt.value > 0:
                     sys.exit()
+                elif evt.action == "RESET" and evt.value > 0:
+                    self.reset()
                 elif evt.action == "toggle_viewer_sync" and evt.value > 0:
                     self.enable_viewer_sync = not self.enable_viewer_sync
+                elif evt.action == "Camera Increment" and evt.value > 0:
+                    self.camera_i += 1
+                    self.camera_i %= self.num_envs
+                elif evt.action == "Camera Decrement" and evt.value > 0:
+                    self.camera_i -= 1
+                    self.camera_i %= self.num_envs
+                elif evt.action == "Toggle Camera" and evt.value > 0:
+                    self.camera_track_robot = not self.camera_track_robot
 
             # fetch results
             if self.device != 'cpu':
@@ -142,3 +163,4 @@ class BaseTask():
                     self.gym.sync_frame_time(self.sim)
             else:
                 self.gym.poll_viewer_events(self.viewer)
+
