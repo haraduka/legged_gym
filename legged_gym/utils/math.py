@@ -54,3 +54,46 @@ def torch_rand_sqrt_float(lower, upper, shape, device):
     r = torch.where(r<0., -torch.sqrt(-r), torch.sqrt(r))
     r =  (r + 1.) / 2.
     return (upper - lower) * r + lower
+
+def copysign(mag: float, other: torch.Tensor) -> torch.Tensor:
+    mag = torch.tensor(mag, device=other.device, dtype=torch.float).repeat(other.shape[0])
+    return torch.abs(mag) * torch.sign(other)
+
+def euler_xyz_from_quat(quat: torch.Tensor) -> Tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
+    q_x, q_y, q_z, q_w = quat[:, 0], quat[:, 1], quat[:, 2], quat[:, 3]
+    # roll (x-axis rotation)
+    sin_roll = 2.0 * (q_w * q_x + q_y * q_z)
+    cos_roll = 1 - 2 * (q_x * q_x + q_y * q_y)
+    roll = torch.atan2(sin_roll, cos_roll)
+
+    # pitch (y-axis rotation)
+    sin_pitch = 2.0 * (q_w * q_y - q_z * q_x)
+    pitch = torch.where(torch.abs(sin_pitch) >= 1, copysign(torch.pi / 2.0, sin_pitch), torch.asin(sin_pitch))
+
+    # yaw (z-axis rotation)
+    sin_yaw = 2.0 * (q_w * q_z + q_x * q_y)
+    cos_yaw = 1 - 2 * (q_y * q_y + q_z * q_z)
+    yaw = torch.atan2(sin_yaw, cos_yaw)
+
+    return roll % (2 * torch.pi), pitch % (2 * torch.pi), yaw % (2 * torch.pi)  # TODO: why not wrap_to_pi here ?
+
+def quat_to_rotmat(q):
+    x, y, z, w = q.unbind(dim=1)
+
+    xx = x * x
+    yy = y * y
+    zz = z * z
+    xy = x * y
+    xz = x * z
+    yz = y * z
+    xw = x * w
+    yw = y * w
+    zw = z * w
+
+    row0 = torch.stack([1 - 2*(yy + zz), 2*(xy - zw),     2*(xz + yw)], dim=1)
+    row1 = torch.stack([2*(xy + zw),     1 - 2*(xx + zz), 2*(yz - xw)], dim=1)
+    row2 = torch.stack([2*(xz - yw),     2*(yz + xw),     1 - 2*(xx + yy)], dim=1)
+
+    R = torch.stack([row0, row1, row2], dim=1)  # shape: (N, 3, 3)
+    return R
+

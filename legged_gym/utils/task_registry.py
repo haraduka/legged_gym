@@ -142,7 +142,7 @@ class TaskRegistry():
             log_dir = None
         else:
             log_dir = os.path.join(log_root, datetime.now().strftime('%b%d_%H-%M-%S') + '_' + train_cfg.runner.run_name)
-        
+
         train_cfg_dict = class_to_dict(train_cfg)
         runner = OnPolicyRunner(env, train_cfg_dict, log_dir, device=args.rl_device)
         #save resume path before creating a new log_dir
@@ -152,7 +152,8 @@ class TaskRegistry():
             resume_path = get_load_path(log_root, load_run=train_cfg.runner.load_run, checkpoint=train_cfg.runner.checkpoint)
             print(f"Loading model from: {resume_path}")
             runner.load(resume_path)
-        return runner, train_cfg
+
+        return runner, train_cfg, log_dir
 
 # make global task registry
 task_registry = TaskRegistry()

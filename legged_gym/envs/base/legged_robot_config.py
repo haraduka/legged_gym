@@ -38,7 +38,7 @@ class LeggedRobotCfg(BaseConfig):
         num_actions = 12
         env_spacing = 3.  # not used with heightfields/trimeshes 
         send_timeouts = True # send time out information to the algorithm
-        episode_length_s = 20 # episode length in seconds
+        episode_length_s = 20 # max episode length in seconds
 
     class terrain:
         mesh_type = 'trimesh' # "heightfield" # none, plane, heightfield or trimesh
@@ -109,7 +109,7 @@ class LeggedRobotCfg(BaseConfig):
         self_collisions = 0 # 1 to disable, 0 to enable...bitwise filter
         replace_cylinder_with_capsule = True # replace collision cylinders with capsules, leads to faster/more stable simulation
         flip_visual_attachments = True # Some .obj meshes must be flipped from y-up to z-up
-        
+
         density = 0.001
         angular_damping = 0.
         linear_damping = 0.
@@ -145,6 +145,8 @@ class LeggedRobotCfg(BaseConfig):
             action_rate = -0.01
             stand_still = -0.
 
+        curriculum = False
+        curriculum_scale = 1e-7
         only_positive_rewards = True # if true negative total rewards are clipped at zero (avoids early termination problems)
         tracking_sigma = 0.25 # tracking reward = exp(-error^2/sigma)
         soft_dof_pos_limit = 1. # percentage of urdf limits, values above this limit are penalized
@@ -211,7 +213,7 @@ class LeggedRobotCfgPPO(BaseConfig):
         # rnn_type = 'lstm'
         # rnn_hidden_size = 512
         # rnn_num_layers = 1
-        
+
     class algorithm:
         # training params
         value_loss_coef = 1.0
@@ -234,7 +236,7 @@ class LeggedRobotCfgPPO(BaseConfig):
         max_iterations = 1500 # number of policy updates
 
         # logging
-        save_interval = 50 # check for potential saves every this many iterations
+        save_interval = 200 # check for potential saves every this many iterations
         experiment_name = 'test'
         run_name = ''
         # load and resume
