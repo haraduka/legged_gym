@@ -40,6 +40,8 @@ from .cassie.cassie_config import CassieRoughCfg, CassieRoughCfgPPO
 from .a1.a1_config import A1RoughCfg, A1RoughCfgPPO
 from .mevius.mevius import Mevius
 from .mevius.mevius_config import MeviusFlatCfg, MeviusFlatCfgPPO
+from .mevius2.mevius2 import Mevius2
+from .mevius2.mevius2_config import Mevius2FlatCfg, Mevius2FlatCfgPPO
 
 
 import os
@@ -52,4 +54,5 @@ task_registry.register( "anymal_b", Anymal, AnymalBRoughCfg(), AnymalBRoughCfgPP
 task_registry.register( "a1", LeggedRobot, A1RoughCfg(), A1RoughCfgPPO() )
 task_registry.register( "cassie", Cassie, CassieRoughCfg(), CassieRoughCfgPPO() )
 task_registry.register( "mevius", Mevius, MeviusFlatCfg(), MeviusFlatCfgPPO() )
+task_registry.register( "mevius2", Mevius2, Mevius2FlatCfg(), Mevius2FlatCfgPPO() )
 

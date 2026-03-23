@@ -29,10 +29,12 @@
 # Copyright (c) 2021 ETH Zurich, Nikita Rudin
 
 import os
+import git
 import copy
 import torch
 import numpy as np
 import random
+import pathlib
 from isaacgym import gymapi
 from isaacgym import gymutil
 
@@ -64,11 +66,19 @@ def update_class_from_dict(obj, dict):
             setattr(obj, key, val)
     return
 
+def store_git_diff(logdir, repository_path):
+    repo = git.Repo(repository_path, search_parent_directories=True)
+    repo_name = pathlib.Path(repo.working_dir).name
+    t = repo.head.commit.tree
+    content = f"--- git status ---\n{repo.active_branch.name}\n{repo.head.object.hexsha}\n{repo.git.status()} \n\n\n--- git diff ---\n{repo.git.diff(t)}"
+    with open(os.path.join(logdir, f"{repo_name}_git.diff"), "x", encoding="utf-8") as f:
+        f.write(content)
+
 def set_seed(seed):
     if seed == -1:
         seed = np.random.randint(0, 10000)
     print("Setting seed: {}".format(seed))
-    
+
     random.seed(seed)
     np.random.seed(seed)
     torch.manual_seed(seed)
